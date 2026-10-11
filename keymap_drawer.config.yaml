@@ -1,0 +1,26 @@
+# keymap-drawer 設定。.github/workflows/draw.yml が参照する。
+# keymap-drawer が名前を解決できない behavior に読みやすいラベルを与える。
+parse_config:
+  raw_binding_map:
+    # --- ブートローダー (SCROLL 層。左半体 p33 / 右半体 p31) ---
+    "&bootloader": "BOOT"
+
+    # --- マウスボタン / ホイール ---
+    "&mkp LCLK": "L CLICK"
+    "&mkp RCLK": "R CLICK"
+    "&mkp MCLK": "M CLICK"
+    "&mkp MB4": "MB4"
+    "&mkp MB5": "MB5"
+    "&msc SCRL_DOWN": "SCRL ↓"
+    "&msc SCRL_UP": "SCRL ↑"
+
+    # --- tap-dance 群 (外側 hold-tap + 内側 tap-dance の逆ネスト) ---
+    # t = 1タップ / h = ホールド。2タップ目の動作は図に出せないのでここに記す。
+    "&td0 NAV 0":       { t: "SPC",   h: "NAV" }    # 2タップ: MO(FUN)
+    "&td1 LALT 0":      { t: "SPC",   h: "LALT" }   # 2タップ: LSHFT
+    "&td3 NUM 0":       { t: "LANG1", h: "NUM" }    # 2タップ: LCTRL
+    "&td4 RALT 0":      { t: "–",     h: "RALT" }   # 2タップ: SK RA(RSHFT)
+    "&td5 LSHFT 0":     { t: "DEL",   h: "LSHFT" }  # 2タップ: LCTRL
+    "&td6 LCTRL 0":     { t: "–",     h: "LCTRL" }  # 2タップ: LSHFT
+    "&td7 LALT 0":      { t: "–",     h: "LALT" }   # 2タップ: LSHFT
+    "&td_lctl LCTRL 0": { t: "–",     h: "LCTRL" }  # 2タップ: Ctrl+Shift
