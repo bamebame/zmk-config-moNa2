@@ -1,6 +1,17 @@
 # zmk-config-moNa2
 
-<img src="keymap-drawer/mona2_01.svg">
+[sayu-hub/zmk-config-moNa2-v2](https://github.com/sayu-hub/zmk-config-moNa2-v2) をベースにした個人用 config。
+キーマップは [zmk-config-Keyball44](https://github.com/bamebame/zmk-config-Keyball44) から移植している。
+
+## キーマップ
+
+`config/mona2.keymap` を変更すると `.github/workflows/draw.yml` が自動で描き直す。
+表記の整え方は `keymap_drawer.config.yaml` の `raw_binding_map` を参照。
+
+<img src="keymap-drawer/mona2.svg">
+
+tap-dance キーは **上段がホールド時 / 下段が1タップ時**の動作。
+図に出せない2タップ目の動作は `keymap_drawer.config.yaml` のコメントに記載。
 
 # COROPITを使用するへ
 
