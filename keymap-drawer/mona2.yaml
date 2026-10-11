@@ -37,11 +37,11 @@ layers:
   - ''
   - F18
   - LGUI
-  - {t: '&td_lctl_inner', h: LCTRL}
-  - {t: '&td0_inner', h: NAV}
+  - {t: –, h: LCTRL}
+  - {t: SPC, h: NAV}
   - {t: LANG2, h: LSHFT}
-  - {t: '&td3_inner', h: NUM}
-  - {t: '&td1_inner', h: LALT}
+  - {t: LANG1, h: NUM}
+  - {t: SPC, h: LALT}
   - SCROLL
   NAV:
   - Q
@@ -81,10 +81,10 @@ layers:
   - {t: ▽, type: trans}
   - LGUI
   - {t: ▽, type: trans}
-  - {type: held}
   - {t: ▽, type: trans}
-  - {t: '&td5_inner', h: LSHFT}
-  - {t: '&td4_inner', h: RALT}
+  - {t: ▽, type: trans}
+  - {t: DEL, h: LSHFT}
+  - {t: –, h: RALT}
   - SCROLL
   FUN:
   - F1
@@ -126,8 +126,8 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: '&td5_inner', h: LSHFT}
-  - {t: '&td4_inner', h: RALT}
+  - {t: DEL, h: LSHFT}
+  - {t: –, h: RALT}
   - {t: ▽, type: trans}
   NUM:
   - '1'
@@ -167,9 +167,9 @@ layers:
   - {t: ▽, type: trans}
   - LGUI
   - {t: ▽, type: trans}
-  - {t: '&td7_inner', h: LALT}
+  - {t: –, h: LALT}
   - LSHFT
-  - {type: held}
+  - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   BALL:
@@ -179,9 +179,9 @@ layers:
   - ''
   - ''
   - Ctl+W
-  - '&mkp MCLK'
-  - '&mkp MB4'
-  - '&mkp MB5'
+  - M CLICK
+  - MB4
+  - MB5
   - ''
   - ''
   - ''
@@ -190,8 +190,8 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - LEFT
-  - '&mkp LCLK'
-  - '&mkp RCLK'
+  - L CLICK
+  - R CLICK
   - RIGHT
   - ''
   - ''
@@ -202,8 +202,8 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - SCROLL
-  - '&msc SCRL_DOWN'
-  - '&msc SCRL_UP'
+  - SCRL ↓
+  - SCRL ↑
   - LCTRL
   - ''
   - ''
@@ -223,8 +223,8 @@ layers:
   - {t: BT, h: '4'}
   - OUT TOG
   - {t: ▽, type: trans}
-  - '&mkp MB4'
-  - '&mkp MB5'
+  - MB4
+  - MB5
   - {t: ▽, type: trans}
   - BT CLR
   - {t: ▽, type: trans}
@@ -233,8 +233,8 @@ layers:
   - F16
   - {t: ▽, type: trans}
   - LEFT
-  - '&mkp LCLK'
-  - '&mkp RCLK'
+  - L CLICK
+  - R CLICK
   - RIGHT
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -247,14 +247,14 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - '&bootloader'
+  - BOOT
   - {t: ▽, type: trans}
-  - '&bootloader'
+  - BOOT
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: '&td7_inner', h: LALT}
-  - {t: '&td6_inner', h: LCTRL}
+  - {t: –, h: LALT}
+  - {t: –, h: LCTRL}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {type: held}
