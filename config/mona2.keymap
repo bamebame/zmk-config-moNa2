@@ -1,59 +1,62 @@
+// moNa2 keymap — zmk-config-Keyball44 からの移植版。
+//
+// Keyball44 = 6列/側 x 3段 + 親指 5+3 = 44キー (外側の列は &none で未使用 = 実質 5列/側)
+// moNa2     = 5列/側 x 3段 + 内側エッジ4キー + 下段 左6/右3 = 42キー
+//
+// 英字コア (5列/側 x 3段) は 1:1 で対応する。親指は内側から対応付けた:
+//   moNa2 p35..p38 <- Keyball44 の左親指4キー (LGUI / td_lctl / td0 NAV / mt LSHFT)
+//   moNa2 p39..p41 <- Keyball44 の右親指3キー (td3 NUM / td1 LALT / mo SCROLL)
+// moNa2 固有キー:
+//   p15 / p26 / p27 / p34 = 内側エッジの自由枠。純正の F13..F16 を F15..F18 に変更
+//   p33 = 左下最外の余りキー。SCROLL 層で左半体の &bootloader
+//   p31 = SCROLL 層で右半体の &bootloader (右から2列目の最下段。Keyball44 と同じ相対位置)
+
 #include <input/processors.dtsi>
 #include <dt-bindings/zmk/input_transform.h>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/pointing.h>
 
 #define ZMK_POINTING_DEFAULT_SCRL_VAL 100
-#define MOUSE 5
-#define SCROLL 6
 
-&mt {
-    flavor = "balanced";
-    quick-tap-ms = <0>;
-};
+#define DEFAULT 0
+#define NAV     1
+#define FUN     2
+#define NUM     3
+#define BALL    4
+#define SCROLL  5
 
 &lt {
-    quick-tap-ms = <300>;
-    flavor = "balanced";
+    tapping-term-ms = <180>;
+    flavor = "hold-preferred";
+    quick-tap-ms = <150>;
+    require-prior-idle-ms = <80>;
 };
+
+&mt {
+    tapping-term-ms = <180>;
+    flavor = "hold-preferred";
+    quick-tap-ms = <150>;
+    require-prior-idle-ms = <80>;
+};
+
+&caps_word { continue-list = <UNDERSCORE MINUS>; };
 
 / {
     combos {
         compatible = "zmk,combos";
 
-        layer4_ESC {
-            bindings = <&lt 4 ESC>;
-            key-positions = <39 38>;
-        };
-
+        // 純正から継承。S+D 同時押しで TAB。
         tab {
             bindings = <&kp TAB>;
             key-positions = <11 12>;
         };
     };
 
-    macros {
-        to_layer_0: to_layer_0 {
-            compatible = "zmk,behavior-macro-one-param";
-            #binding-cells = <1>;
-            bindings = <&to 0 &macro_param_1to1 &kp MACRO_PLACEHOLDER>;
-            label = "TO_LAYER_0";
-        };
-    };
-
     behaviors {
-        lt_to_layer_0: lt_to_layer_0 {
-            compatible = "zmk,behavior-hold-tap";
-            label = "LAYER_TAP_TO_0";
-            bindings = <&mo>, <&to_layer_0>;
-
-            #binding-cells = <2>;
-            tapping-term-ms = <200>;
-        };
-
         scroll_up_down: mouse_wheel_up_down {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
@@ -69,83 +72,231 @@
 
             tap-ms = <20>;
         };
+
+        // === 左親指キー: hold=引数のmod(LCTRL) / 1タップ=無反応 / 2タップ=LC(LSHFT) ===
+        // (旧 td_ball。BALL 層とは無関係のため改名)
+        td_lctl_inner: td_lctl_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&none>, <&kp LC(LSHFT)>;
+        };
+        td_lctl: td_lctl {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&kp>, <&td_lctl_inner>;
+        };
+
+        // === Vial tap-dance 再現 (逆ネスト方式 + quick-tap-ms) ===
+        // 外側 hold-tap（hold判定をpress時点で確立 → ホールド+他キー即動作）
+        // 内側 tap-dance（tap時に多重押下で2nd-action発動）
+        // quick-tap-ms により「タップ→ホールド」も内側で正しく検出
+
+        // --- 内側 tap-dance: tap時の単押し/連打分岐 ---
+        td0_inner: td0_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&kp SPACE>, <&mo FUN>;
+        };
+        td1_inner: td1_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&kp SPACE>, <&kp LSHFT>;
+        };
+        td2_inner: td2_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&kp LANG2>, <&kp LCTRL>;
+        };
+        td3_inner: td3_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&kp LANG1>, <&kp LCTRL>;
+        };
+        td4_inner: td4_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&none>, <&sk RA(RSHFT)>;
+        };
+        td5_inner: td5_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&kp DEL>, <&kp LCTRL>;
+        };
+        td6_inner: td6_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&none>, <&kp LSHFT>;
+        };
+        td7_inner: td7_inner {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <250>;
+            bindings = <&none>, <&kp LSHFT>;
+        };
+
+        // --- 外側 hold-tap: hold-preferred+quick-tap-ms で全機能を両立 ---
+        td0: td0 { // hold=MO(layer), tap=td0_inner / 呼出: &td0 NAV 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&mo>, <&td0_inner>;
+        };
+        td1: td1 { // hold=&kp(mod), tap=td1_inner / 呼出: &td1 LALT 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&kp>, <&td1_inner>;
+        };
+        td2: td2 { // 呼出: &td2 FUN 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&mo>, <&td2_inner>;
+        };
+        td3: td3 { // 呼出: &td3 NUM 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&mo>, <&td3_inner>;
+        };
+        td4: td4 { // 呼出: &td4 RALT 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&kp>, <&td4_inner>;
+        };
+        td5: td5 { // 呼出: &td5 LSHFT 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&kp>, <&td5_inner>;
+        };
+        td6: td6 { // 呼出: &td6 LCTRL 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&kp>, <&td6_inner>;
+        };
+        td7: td7 { // 呼出: &td7 LALT 0
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <250>;
+            require-prior-idle-ms = <80>;
+            bindings = <&kp>, <&td7_inner>;
+        };
     };
 
     keymap {
         compatible = "zmk,keymap";
 
+        // L0: 英字 / 親指: td0=NAV, mt=LSHFT, td3=NUM, td1=LALT
         default_layer {
+            display-name = "QWRT";
             bindings = <
-&kp Q             &kp W         &kp E    &kp R          &kp T                                                          &kp Y        &kp U  &kp I      &kp O    &kp P
-&kp A             &kp S         &kp D    &kp F          &kp G                                  &kp F13                 &kp H        &kp J  &kp K      &kp L    &kp SEMICOLON
-&mt LEFT_SHIFT Z  &kp X         &kp C    &kp V          &kp B        &kp F14                   &kp F15                 &kp N        &kp M  &kp COMMA  &kp DOT  &kp SLASH
-&kp LCTRL         &kp LEFT_WIN  &kp F16  &kp BACKSPACE  &lt 2 ENTER  &lt_to_layer_0 3 LANG2    &lt_to_layer_0 3 LANG1  &lt 1 SPACE                             &kp LEFT_ALT
+&kp Q              &kp W              &kp E              &kp R              &kp T        &kp Y              &kp U              &kp I              &kp O              &kp P
+&kp A              &kp S              &kp D              &kp F              &kp G        &kp F15            &kp H              &kp J              &kp K              &kp L              &kp SEMI
+&kp Z              &kp X              &kp C              &kp V              &kp B              &kp F16        &kp F17            &kp N              &kp M              &kp COMMA          &kp DOT            &kp FSLH
+&none              &kp F18            &kp LGUI           &td_lctl LCTRL 0   &td0 NAV 0         &mt LSHFT LANG2        &td3 NUM 0         &td1 LALT 0        &mo SCROLL
             >;
 
             sensor-bindings = <&scroll_up_down>;
         };
 
-        layer_1 {
+        // L1: ナビ / 音量 / コピペ (ノブ=音量)
+        nav_layer {
+            display-name = "NAV";
             bindings = <
-&kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3      &kp NUMBER_4       &kp NUMBER_5                    &kp NUMBER_6  &kp NUMBER_7          &kp NUMBER_8           &kp NUMBER_9  &kp NUMBER_0
-&trans        &trans        &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &trans                  &trans  &trans        &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans        &kp BACKSLASH
-&trans        &trans        &trans            &trans             &trans        &trans    &trans  &trans        &trans                &trans                 &trans        &kp PIPE
-&trans        &trans        &trans            &trans             &trans        &trans    &trans  &trans                                                                   &trans
-            >;
-
-            sensor-bindings = <&scroll_right_left>;
-        };
-
-        layer_2 {
-            bindings = <
-&kp EXCLAMATION  &kp AT_SIGN  &kp POUND          &kp DOLLAR  &kp PERCENT                      &kp CARET  &kp AMPERSAND  &kp ASTERISK  &kp MINUS  &kp UNDERSCORE
-&kp GRAVE        &kp TILDE    &kp DOUBLE_QUOTES  &kp SQT     &trans                  &trans   &mkp MB3   &mkp MB1       &mkp MB2      &kp EQUAL  &kp PLUS
-&kp F1           &kp F2       &kp F3             &kp F4      &kp F5       &kp F11    &kp F12  &kp F6     &kp F7         &kp F8        &kp F9     &kp F10
-&trans           &trans       &trans             &trans      &trans       &trans     &trans   &trans                                             &trans
-            >;
-
-            sensor-bindings = <&scroll_up_down>;
-        };
-
-        layer_3 {
-            bindings = <
-&trans  &kp LC(LS(TAB))     &kp PRINTSCREEN         &kp LC(TAB)              &trans                                     &trans  &kp HOME        &kp UP_ARROW    &kp END          &trans
-&trans  &kp LG(LEFT_ARROW)  &kp LG(RIGHT_ARROW)     &kp LC(LG(LEFT_ARROW))   &kp LC(LG(RIGHT_ARROW))            &trans  &trans  &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &trans
-&trans  &kp LEFT_SHIFT      &kp LG(LS(LEFT_ARROW))  &kp LG(LS(RIGHT_ARROW))  &trans                   &trans    &trans  &trans  &kp DELETE      &kp PAGE_UP     &kp PAGE_DOWN    &trans
-&trans  &trans              &trans                  &trans                   &trans                   &trans    &trans  &trans                                                   &trans
+&kp Q              &kp W              &kp E              &kp R              &kp T        &kp Y              &kp ENTER          &kp ESC            &kp TAB            &kp END
+&kp C_VOL_DN       &kp C_VOL_UP       &kp LCTRL          &kp LSHFT          &kp G        &trans             &kp LEFT           &kp DOWN           &kp UP             &kp RIGHT          &kp HOME
+&kp LC(Z)          &kp LC(X)          &kp LC(C)          &kp LC(V)          &kp ENTER          &trans        &trans             &kp BSPC           &kp GRAVE          &kp MINUS          &kp EQUAL          &kp BSLH
+&none              &trans             &kp LGUI           &trans             &trans             &trans        &td5 LSHFT 0       &td4 RALT 0        &mo SCROLL
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP>;
         };
 
-        layer_4 {
+        // L2: F-key / マウスホイール / マウスボタン
+        fun_layer {
+            display-name = "FUN";
             bindings = <
-&trans  &trans  &trans  &trans  &trans                         &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4
-&trans  &trans  &trans  &trans  &trans            &trans       &trans        &trans        &trans        &trans        &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &bootloader  &trans        &trans        &trans        &trans        &bt BT_CLR
-&trans  &trans  &trans  &trans  &trans  &trans    &trans       &trans                                                  &bt BT_CLR_ALL
+&kp F1             &kp F2             &kp F3             &kp F4             &kp F5        &kp F6             &kp F7             &kp F8             &kp F9             &kp F10
+&kp F11            &kp F12            &kp LCTRL          &kp LSHFT          &kp F16        &trans             &kp H              &kp J              &kp K              &kp LBKT           &kp RBKT
+&kp LC(Z)          &kp LC(X)          &kp LC(C)          &kp LC(V)          &kp LC(B)          &trans        &trans             &kp N              &kp M              &kp COMMA          &kp DOT            &kp FSLH
+&none              &trans             &kp LGUI           &trans             &trans             &trans        &td5 LSHFT 0       &td4 RALT 0        &trans
             >;
 
             sensor-bindings = <&scroll_up_down>;
         };
 
-        MOUSE {
+        // L3: 数字行 (ノブ=横スクロール)
+        num_layer {
+            display-name = "NUM";
             bindings = <
-&trans  &trans    &trans    &trans    &trans                    &trans  &trans    &trans    &trans    &trans
-&trans  &mkp MB3  &mkp MB2  &mkp MB1  &trans            &trans  &trans  &mkp MB1  &mkp MB2  &mkp MB3  &trans
-&trans  &trans    &trans    &trans    &trans  &trans    &trans  &trans  &trans    &trans    &trans    &trans
-&trans  &trans    &trans    &trans    &trans  &trans    &trans  &trans                                &trans
+&kp N1             &kp N2             &kp N3             &kp N4             &kp N5        &kp N6             &kp N7             &kp N8             &kp N9             &kp N0
+&kp A              &kp S              &kp D              &kp F              &kp G        &trans             &kp H              &kp J              &kp SQT            &kp LBKT           &kp RBKT
+&kp Z              &kp X              &kp C              &kp V              &kp B              &trans        &trans             &kp N              &kp M              &kp COMMA          &kp DOT            &kp FSLH
+&none              &trans             &kp LGUI           &trans             &td7 LALT 0        &kp LSHFT        &trans             &trans             &trans
+            >;
+
+            sensor-bindings = <&scroll_right_left>;
+        };
+
+        // L4: BALL (マウスボタン / スクロール起動) — ボール移動で自動的に入る
+        ball_layer {
+            display-name = "BALL";
+            bindings = <
+&none              &none              &none              &none              &none        &kp LC(W)          &mkp MCLK          &mkp MB4           &mkp MB5           &none
+&none              &none              &trans             &trans             &trans        &trans             &kp LEFT           &mkp LCLK          &mkp RCLK          &kp RIGHT          &none
+&none              &none              &none              &none              &none              &trans        &trans             &mo SCROLL         &msc SCRL_DOWN     &msc SCRL_UP       &kp LCTRL          &none
+&none              &trans             &none              &trans             &trans             &trans        &none              &none              &none
             >;
 
             sensor-bindings = <&scroll_up_down>;
         };
 
-        SCROLL {
+        // L5: SCROLL (BT/出力切替 / 方向スクロール / bootloader)
+        scroll_layer {
+            display-name = "SCROLL";
             bindings = <
-&trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans            &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans                          &trans
+&bt BT_SEL 0       &bt BT_SEL 1       &bt BT_SEL 2       &bt BT_SEL 3       &bt BT_SEL 4        &out OUT_TOG       &trans             &mkp MB4           &mkp MB5           &trans
+&bt BT_CLR         &trans             &kp LCTRL          &kp LSHFT          &kp F16        &trans             &kp LEFT           &mkp LCLK          &mkp RCLK          &kp RIGHT          &trans
+&trans             &trans             &trans             &trans             &trans             &trans        &trans             &trans             &trans             &trans             &bootloader        &trans
+&bootloader        &trans             &trans             &trans             &td7 LALT 0        &td6 LCTRL 0        &trans             &trans             &trans
             >;
 
             sensor-bindings = <&scroll_up_down>;
