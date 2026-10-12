@@ -48,17 +48,15 @@
 
     trackball_central: trackball_central@0 {
         status = "okay";
-        compatible = "pixart,pmw3610";  //トラボセンサ用のドライバとバインド
+        compatible = "pixart,paw3222";  //トラボセンサ用のドライバとバインド
         reg = <0>;
         spi-max-frequency = <2000000>;
         irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //P0.02を指定(MOTION)
-        cpi = <600>;
-        //swap-xy;
-        //invert-x; //COROPIT版ではコメントアウトを外す
-        //invert-y; //COROPIT版ではコメントアウトを外す
-        evt-type = <INPUT_EV_REL>;
-        x-input-code = <INPUT_REL_X>;
-        y-input-code = <INPUT_REL_Y>;
+
+        // PAW3222 の解像度は 38 CPI 刻みで、有効範囲は 608 (16*38) 〜 4826 (127*38)。
+        // 範囲外だと paw32xx_set_resolution が -EINVAL で設定をスキップする。
+        // 608 は純正 PMW3610 版の cpi=600 に最も近い有効値。
+        res-cpi = <608>;
     };
 };
 
