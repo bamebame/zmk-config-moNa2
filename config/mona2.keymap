@@ -20,7 +20,10 @@
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/pointing.h>
 
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 100
+// ZMK_POINTING_DEFAULT_SCRL_VAL は定義しない (= ZMK 既定の 10)。
+// upstream の純正キーマップは 100 を定義しており、&msc SCRL_* を使う
+// BALL 層のスクロールキーとノブが既定の10倍動いていた。
+// Keyball39/44 と CLine46 はいずれも未定義なので、揃えるために外した。
 
 #define DEFAULT 0
 #define NAV     1
