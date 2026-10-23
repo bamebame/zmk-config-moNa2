@@ -76,6 +76,10 @@
     kscan0: kscan {
         compatible = "zmk,kscan-gpio-matrix";
         label = "KSCAN";
+        // ディープスリープからキー押下で復帰するために必須。
+        // これが無いと zmk_pm_suspend_devices() が kscan ごと suspend し、
+        // キーを押しても起こす手段が無くなる (Keyball で実際に踏んだ罠)。
+        wakeup-source;
         diode-direction = "col2row";
             row-gpios
                 = <&xiao_d 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)> 
