@@ -63,21 +63,32 @@
 
 // Overrides for the input listener node
 // === オートマウスレイヤー(BALL=4)の誤爆対策 ===
-// zip_temp_layer 自体は移動量しきい値を持たないため、時間と打鍵で制御する。
-&zip_temp_layer {
-    // 直前の打鍵から 300ms 以内はボールを動かしても BALL 層へ入らない。
-    // 150ms では 60 WPM の打鍵間隔 (約 200ms) を覆えず誤爆する。300ms は 40 WPM 相当。
-    // 抑制されるのはレイヤー切替だけで、ポインタ移動は打鍵直後でも通る。
-    require-prior-idle-ms = <300>;
+// ZMK 標準の zip_temp_layer は移動量を見ず 1 カウントでも発動するため、
+// タイピング中の振動やボールの転がりで BALL 層に入ってしまっていた。
+// gohanda11/zmk-input-processor-threshold-temp-layer に差し替え、
+// 「累積移動距離がしきい値を超えたら発動」する判定を足す。
+/ {
+    zip_threshold_temp_layer: input_processor_threshold_temp_layer {
+        compatible = "zmk,input-processor-threshold-temp-layer";
+        #input-processor-cells = <2>;
 
-    // ここに挙げた位置「以外」のキーを押すと BALL 層を即座に解除する。
-    // = BALL 層で実際に使うキーだけを列挙 (位置番号は 0..41)。
-    //    5  6  7  8      LC(W) 中クリック MB4 MB5
-    //   16 17 18 19      ← 左クリック 右クリック →
-    //   28 29 30 31      MO(SCROLL) スクロール下 スクロール上 LCTRL
-    //   36               左親指 td_lctl (hold=LCTRL)
-    //   ※ 上記以外は BALL 層で &none か &trans。押した時点で BALL 層を抜ける。
-    excluded-positions = <5 6 7 8 16 17 18 19 28 29 30 31 36>;
+        // 発動に必要な累積移動距離 (センサーのカウント数)。
+        // res-cpi = 608 なので 1 カウント ≒ 0.042mm → 100 ≒ 4.2mm。
+        // 意図的にボールを回せば超え、振動レベルでは超えない想定。
+        activation-threshold = <100>;
+
+        // 直前の打鍵から 300ms 以内はボールを動かしても BALL 層へ入らない。
+        // この判定は蓄積処理より手前にあるため、打鍵中の振動は累積にも入らない。
+        require-prior-idle-ms = <300>;
+
+        // ここに挙げた位置「以外」のキーを押すと BALL 層を即座に解除する。
+        // = BALL 層で実際に使うキーだけを列挙 (位置番号は 0..41)。
+        //    5  6  7  8      LC(W) 中クリック MB4 MB5
+        //   16 17 18 19      ← 左クリック 右クリック →
+        //   28 29 30 31      MO(SCROLL) スクロール下 スクロール上 LCTRL
+        //   36               左親指 td_lctl (hold=LCTRL)
+        excluded-positions = <5 6 7 8 16 17 18 19 28 29 30 31 36>;
+    };
 };
 
 &trackball_central_listener {
@@ -85,7 +96,7 @@
     device = <&trackball_central>;
 
     // ボール移動で BALL(4) 層へ / 停止後 500ms で復帰
-    input-processors = <&zip_temp_layer 4 500>;
+    input-processors = <&zip_threshold_temp_layer 4 500>;
 
     scroller {
         layers = <5>;                                       //SCROLL 層

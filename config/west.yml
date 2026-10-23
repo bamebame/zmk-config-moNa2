@@ -10,6 +10,8 @@ manifest:
       url-base: https://github.com/caksoylar
     - name: zettaface  # <-- Input Processor Keybind
       url-base: https://github.com/zettaface
+    - name: gohanda11  # <-- Threshold Temp Layer
+      url-base: https://github.com/gohanda11
   projects:
     - name: zmk
       remote: zmkfirmware
@@ -23,6 +25,9 @@ manifest:
       revision: v0.3-branch
     - name: zmk-input-processor-keybind
       remote: zettaface
+      revision: main
+    - name: zmk-input-processor-threshold-temp-layer
+      remote: gohanda11
       revision: main
   self:
     path: config
