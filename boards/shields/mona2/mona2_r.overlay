@@ -1,5 +1,5 @@
 #include "mona2.dtsi"
-#include <input/processors.dtsi>
+// <input/processors.dtsi> は mona2.dtsi が既に include している
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
 
@@ -54,7 +54,8 @@
         irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //P0.02を指定(MOTION)
 
         // PAW3222 の解像度は 38 CPI 刻みで、有効範囲は 608 (16*38) 〜 4826 (127*38)。
-        // 範囲外だと paw32xx_set_resolution が -EINVAL で設定をスキップする。
+        // 範囲外だと paw3222.c の BUILD_ASSERT でビルドが失敗する
+        // (実行時に paw32xx_set_resolution へ届く前に止まる)。
         // 608 は純正 PMW3610 版の cpi=600 に最も近い有効値。
         res-cpi = <608>;
     };
@@ -87,7 +88,12 @@
         //   16 17 18 19      ← 左クリック 右クリック →
         //   28 29 30 31      MO(SCROLL) スクロール下 スクロール上 LCTRL
         //   36               左親指 td_lctl (hold=LCTRL)
-        excluded-positions = <5 6 7 8 16 17 18 19 28 29 30 31 36>;
+        //   38               左親指 mt LSHFT LANG2 (hold=LSHFT)
+        //
+        // 36/38 を入れているのは Ctrl+クリック / Shift+クリックのため。
+        // これらを外すと、修飾キーを押した瞬間に BALL 層が解除され、
+        // 続くクリックが L0 の &kp J などになってしまう。
+        excluded-positions = <5 6 7 8 16 17 18 19 28 29 30 31 36 38>;
     };
 };
 
@@ -105,7 +111,7 @@
             <&zip_xy_transform INPUT_TRANSFORM_X_INVERT>,       //X軸反転
             <&zip_xy_to_scroll_mapper>,                         //スクロールモードに変更
             <&zip_scroll_transform INPUT_TRANSFORM_X_INVERT>,   //スクロールのX軸反転
-            <&zip_scroll_scaler 1 5>;                           //スクロール量を1/4倍
+            <&zip_scroll_scaler 1 5>;                           //スクロール量を1/5倍 (セルは <乗数 除数>)
     };
 
 };
