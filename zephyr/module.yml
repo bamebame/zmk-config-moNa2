@@ -1,3 +1,14 @@
+# このリポジトリ自体を Zephyr モジュールとして登録する宣言。
+# ZMK の build-user-config.yml は、リポジトリ直下に zephyr/module.yml が
+# あると -DZMK_EXTRA_MODULES='<リポジトリ>' を付けてビルドする。
+#   board_root : boards/shields/mona2 を読み込む (従来からの設定)
+#   cmake      : src/ の入力プロセッサをビルドする
+#   kconfig    : Kconfig を読み込む
+#   dts_root   : dts/bindings/ を読み込む
+name: zmk-config-mona2
 build:
+  cmake: .
+  kconfig: Kconfig
   settings:
     board_root: .
+    dts_root: .

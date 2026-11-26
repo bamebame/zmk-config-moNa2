@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: MIT
+
+description: |
+  Input Processor for temporarily enabling a layer after input events.
+
+  Behaves like zmk,input-processor-temp-layer, except that pressing or
+  releasing a key listed in excluded-positions also extends the layer's
+  deactivation timeout instead of merely not cancelling it.
+
+compatible: "zmk,input-processor-sticky-temp-layer"
+
+include: ip_two_param.yaml
+
+properties:
+  require-prior-idle-ms:
+    type: int
+    required: false
+    default: 0
+    description: |
+      Time in milliseconds that must pass after the last keystroke before the
+      layer can be toggled.
+
+  activation-threshold:
+    type: int
+    required: false
+    default: 0
+    description: |
+      Minimum accumulated movement (in sensor counts) required before the layer
+      activates. X and Y arrive as separate events, so the accumulation is a
+      Manhattan sum. 0 disables the threshold, activating on any movement.
+
+  accumulation-timeout-ms:
+    type: int
+    required: false
+    default: 0
+    description: |
+      Discard the accumulated movement if no movement arrives for this long.
+      0 never discards, which lets small drifts add up until the threshold is
+      eventually crossed. Only meaningful with activation-threshold set.
+
+  excluded-positions:
+    type: array
+    required: false
+    default: []
+    description: |
+      Array of key positions that will NOT trigger layer deactivation when
+      pressed. These positions extend the layer timeout instead.

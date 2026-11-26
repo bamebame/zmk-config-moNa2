@@ -6,8 +6,6 @@ manifest:
       url-base: https://github.com/sekigon-gonnoc
     - name: caksoylar  # <-- RGB LED
       url-base: https://github.com/caksoylar
-    - name: gohanda11  # <-- Threshold Temp Layer
-      url-base: https://github.com/gohanda11
   # revision は全て SHA で固定する。
   # ブランチ名 (v0.3-branch / main) のままだと、同じ config コミットから
   # ビルドしても毎回別のファームになり、設定を1項目ずつ変える比較ができない。
@@ -23,8 +21,5 @@ manifest:
     - name: zmk-rgbled-widget
       remote: caksoylar
       revision: 8756cb7b8114069fa3c25c6f6c990f24988fceff  # v0.3-branch @ 2026-11-25
-    - name: zmk-input-processor-threshold-temp-layer
-      remote: gohanda11
-      revision: a68fedf50dd3b25d7aa594776c26b943fe41cfbf  # main @ 2026-11-25
   self:
     path: config

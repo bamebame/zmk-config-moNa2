@@ -63,20 +63,42 @@
 
 
 // Overrides for the input listener node
-// === オートマウスレイヤー(BALL=4)の誤爆対策 ===
-// ZMK 標準の zip_temp_layer は移動量を見ず 1 カウントでも発動するため、
-// タイピング中の振動やボールの転がりで BALL 層に入ってしまっていた。
-// gohanda11/zmk-input-processor-threshold-temp-layer に差し替え、
-// 「累積移動距離がしきい値を超えたら発動」する判定を足す。
+// === オートマウスレイヤー(BALL=4)の制御 ===
+// ZMK 標準の zip_temp_layer には2つ問題があった。
+//  1. 移動量を見ず 1 カウントでも発動するため、タイピング中の振動や
+//     ボールの転がりで BALL 層に入ってしまう。
+//  2. excluded-positions に挙げたキーを押しても無効化タイマーが延長されない。
+//     再セットしているのは temp_layer_handle_event() の中の 1 行だけで、
+//     これは入力リスナー経由でポインタ入力が来たときしか呼ばれない。
+//     キー押下は handle_position_state_changed という別経路で届くが、
+//     そこには解除の処理しか無い。結果、ボールを止めてクリックを連打すると
+//     最後のボール移動からタイムアウト時間で層が落ちる。
+//
+// 1 は以前 gohanda11/zmk-input-processor-threshold-temp-layer で対処していたが、
+// 2 も直すため、このリポジトリ自身の src/input_processor_sticky_temp_layer.c に
+// 一本化した (Keyball39 側と同一ファイル)。ZMK 公式の実装をベースにしており、
+// 排他制御・work 経由のレイヤー操作・zmk_layer_state_changed の購読による
+// 整合取り・多重インスタンス対応をそのまま引き継いでいる。
 / {
-    zip_threshold_temp_layer: input_processor_threshold_temp_layer {
-        compatible = "zmk,input-processor-threshold-temp-layer";
+    zip_sticky_temp_layer: input_processor_sticky_temp_layer {
+        compatible = "zmk,input-processor-sticky-temp-layer";
         #input-processor-cells = <2>;
 
         // 発動に必要な累積移動距離 (センサーのカウント数)。
         // res-cpi = 608 なので 1 カウント ≒ 0.042mm → 100 ≒ 4.2mm。
         // 意図的にボールを回せば超え、振動レベルでは超えない想定。
+        //
+        // 累積は X/Y の相対移動イベントごとに |value| を足すマンハッタン距離。
+        // 以前使っていた gohanda11 版も、関数内 static の持ち方のせいで
+        // 八角形近似が効かず実質同じ計算だったので、体感は変わらない。
         activation-threshold = <100>;
+
+        // 500ms 動きが無ければ累積を捨てる。
+        // 以前の実装には減衰が無く、レイヤーが一度も発動しない限り累積が
+        // 増え続けるため、わずかなドリフトの積み重ねでいつか発動していた
+        // (手を置いて読んでいるだけのときなど)。これで「一続きの動きで
+        // 4.2mm」という本来の意味になる。長すぎると感じたら縮める。
+        accumulation-timeout-ms = <500>;
 
         // 直前の打鍵から 300ms 以内はボールを動かしても BALL 層へ入らない。
         // この判定は蓄積処理より手前にあるため、打鍵中の振動は累積にも入らない。
@@ -93,6 +115,9 @@
         // 36/38 を入れているのは Ctrl+クリック / Shift+クリックのため。
         // これらを外すと、修飾キーを押した瞬間に BALL 層が解除され、
         // 続くクリックが L0 の &kp J などになってしまう。
+        //
+        // sticky 版ではこれらのキーの押下・離上で無効化タイマーが延長される。
+        // ボールを止めてクリックを連打しても層が落ちない。
         excluded-positions = <5 6 7 8 16 17 18 19 28 29 30 31 36 38>;
     };
 };
@@ -101,8 +126,9 @@
     status = "okay";
     device = <&trackball_central>;
 
-    // ボール移動で BALL(4) 層へ / 停止後 500ms で復帰
-    input-processors = <&zip_threshold_temp_layer 4 500>;
+    // ボール移動で BALL(4) 層へ。ボールが止まり、かつ BALL 層のキーも
+    // 操作されなくなってから 1000ms で復帰する。
+    input-processors = <&zip_sticky_temp_layer 4 1000>;
 
     scroller {
         layers = <5>;                                       //SCROLL 層

@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MIT
+
+if ZMK_POINTING
+
+config ZMK_INPUT_PROCESSOR_STICKY_TEMP_LAYER
+    bool "Sticky Temporary Layer Input Processor"
+    default y
+    depends on DT_HAS_ZMK_INPUT_PROCESSOR_STICKY_TEMP_LAYER_ENABLED
+    help
+      ZMK 標準の temp-layer 入力プロセッサに「excluded-positions に挙げた
+      キーを押しても無効化タイマーを延長する」挙動を追加したもの。
+      ボールを止めたままレイヤー上のキーを操作し続けてもレイヤーが
+      落ちなくなる。
+
+config ZMK_INPUT_PROCESSOR_STICKY_TEMP_LAYER_MAX_ACTION_EVENTS
+    int "Sticky Temporary Layer Input Processor Max Action Events"
+    default 4
+    depends on ZMK_INPUT_PROCESSOR_STICKY_TEMP_LAYER
+
+endif # ZMK_POINTING
