@@ -108,13 +108,16 @@
         status = "disabled";
     };
 
-    right_encoder: encoder_right {
-        status = "disabled";
-    };
+    // 右半体にエンコーダーは無い。sensors に登録していた right_encoder は
+    // compatible を持たないダミーで、DEVICE_DT_GET_OR_NULL が NULL を返す
+    // だけの死にノードだった (zmk_sensor_keymap の2列目がゼロ埋めされ、
+    // 各レイヤーの sensor-bindings 1個と個数が合っていなかった)。
+    // 右に足すときは mona2_r.overlay に alps,ec11 のノードを定義して
+    // ここの sensors に追加し、config/mona2_r.conf に CONFIG_EC11=y を戻す。
 
     sensors: sensors {
         compatible = "zmk,keymap-sensors";
-        sensors = <&left_encoder &right_encoder>;
+        sensors = <&left_encoder>;
         triggers-per-rotation = <10>;
     };
 
