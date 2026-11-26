@@ -6,8 +6,13 @@ on:
   push:
     paths:
       - "config/mona2.keymap"
+      - "config/mona2.json"
       - "keymap_drawer.config.yaml"
-      - "config/mona2.dtsi"
+      - ".github/workflows/draw.yml"
+      # 物理レイアウト (keymap_drawer が参照する physical_layout0) の実体。
+      # 以前は存在しない "config/mona2.dtsi" を指していたため、
+      # レイアウトを変えてもキーマップ図が再生成されなかった。
+      - "boards/shields/mona2/mona2.dtsi"
 
 jobs:
   draw:
