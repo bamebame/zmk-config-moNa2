@@ -2,32 +2,29 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    - name: sayu-hub
-      url-base: https://github.com/sayu-hub
     - name: sekigon-gonnoc  # <-- PAW3222
       url-base: https://github.com/sekigon-gonnoc
     - name: caksoylar  # <-- RGB LED
       url-base: https://github.com/caksoylar
-    - name: zettaface  # <-- Input Processor Keybind
-      url-base: https://github.com/zettaface
     - name: gohanda11  # <-- Threshold Temp Layer
       url-base: https://github.com/gohanda11
+  # revision は全て SHA で固定する。
+  # ブランチ名 (v0.3-branch / main) のままだと、同じ config コミットから
+  # ビルドしても毎回別のファームになり、設定を1項目ずつ変える比較ができない。
+  # 更新するときは意図して SHA を差し替え、何を上げたかコミットに残す。
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: v0.3-branch
+      revision: acfd8e5ea76cf23ad1c9b6b99848f97a95224257  # v0.3-branch @ 2026-11-25
       import: app/west.yml
     - name: zmk-driver-paw3222
       remote: sekigon-gonnoc
-      revision: main
+      revision: df652881be2520bde4f64ab6ca35e4c5708f4f9b  # main @ 2026-11-25
     - name: zmk-rgbled-widget
       remote: caksoylar
-      revision: v0.3-branch
-    - name: zmk-input-processor-keybind
-      remote: zettaface
-      revision: main
+      revision: 8756cb7b8114069fa3c25c6f6c990f24988fceff  # v0.3-branch @ 2026-11-25
     - name: zmk-input-processor-threshold-temp-layer
       remote: gohanda11
-      revision: main
+      revision: a68fedf50dd3b25d7aa594776c26b943fe41cfbf  # main @ 2026-11-25
   self:
     path: config
